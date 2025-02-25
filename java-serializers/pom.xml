@@ -16,5 +16,6 @@
         <module>java-serializer-plugin</module>
         <module>java-serializer-plugin-test</module>
         <module>java-serializer-plugin-impl-kryo</module>
+        <module>java-serializer-plugin-interface</module>
     </modules>
 </project>

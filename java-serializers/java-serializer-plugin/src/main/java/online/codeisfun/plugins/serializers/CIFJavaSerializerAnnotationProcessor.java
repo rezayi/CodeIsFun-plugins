@@ -1,15 +1,13 @@
 package online.codeisfun.plugins.serializers;
 
 import com.google.auto.service.AutoService;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -19,60 +17,35 @@ import java.util.Set;
 @AutoService(Processor.class)
 public class CIFJavaSerializerAnnotationProcessor extends AbstractProcessor {
 
-    private Class<? extends CIFJavaSerializerInterface> serializerClass = CIFJavaSerializerKryoImplementation.class;
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        SerializerLoader.loadImplementations();
+//        var serializerClass = findSerializerInterface(roundEnv);
         for (TypeElement annotation : annotations) {
-            Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWithAny(annotation);
+            Set<? extends TypeElement> annotatedElements = (Set<TypeElement>) roundEnv.getElementsAnnotatedWith(annotation);
             Map<String, CIFClass> cifClassMap = new HashMap<>();
             annotatedElements.forEach(annotatedElement -> {
-                if (annotatedElement instanceof TypeElement) {
-                    processClass((TypeElement) annotatedElement, cifClassMap);
-                    try {
-                        generateEnhancedClass((TypeElement) annotatedElement);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                processClass(annotatedElement, cifClassMap);
             });
-            cifClassMap.forEach((className, CIFClass) -> {
-                ProcessCifClass(CIFClass);
-            });
+//            cifClassMap.forEach((className, cifClass) -> ProcessCifClass(cifClass, serializerClass));
         }
         return true;
     }
 
-    private void generateEnhancedClass(TypeElement classElement) throws IOException {
-        String packageName = processingEnv.getElementUtils()
-                .getPackageOf(classElement).getQualifiedName().toString();
-        String className = classElement.getSimpleName().toString() + "CIFSerializer";
-
+    private void ProcessCifClass(CIFClass cifClass, Class<CIFJavaSerializerInterface> serializerClass) {
         try {
-            JavaFileObject builderFile = processingEnv.getFiler()
-                    .createSourceFile(packageName + "." + className);
+            String packageName = cifClass.getPackageName();
+            String originalClassName = cifClass.getClassName();
+            String generatedClassName = originalClassName + "CIFSerializer";
+            TypeSpec.Builder classBuilder = TypeSpec.classBuilder(generatedClassName);
 
-            try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
-                if (!packageName.isEmpty()) {
-                    out.println("package " + packageName + ";");
-                    out.println();
-                }
-                out.println("public class " + className + "{");
-                out.println("    // Original class content preserved");
-                out.println("}");
-            }
-        } catch (IOException e) {
-            processingEnv.getMessager().printMessage(
-                    Diagnostic.Kind.ERROR,
-                    "Failed to process " + className + ": " + e.getMessage()
-            );
-        }
-    }
-
-    private void ProcessCifClass(CIFClass cifClass) {
-        try {
             CIFJavaSerializerInterface serializer = serializerClass.getDeclaredConstructor().newInstance();
-            serializer.initialize(cifClass);
+            serializer.initialize(classBuilder, cifClass, originalClassName);
+
+            // Write the class to a Java file
+            JavaFile javaFile = JavaFile.builder(packageName, classBuilder.build()).build();
+            javaFile.writeTo(processingEnv.getFiler());
         } catch (Exception e) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,
@@ -85,10 +58,10 @@ public class CIFJavaSerializerAnnotationProcessor extends AbstractProcessor {
 
     private void processClass(TypeElement typeElement, Map<String, CIFClass> protoClassMap) {
         try {
-            CIFClass CIFClass = online.codeisfun.plugins.serializers.CIFClass.fromClass(processingEnv, typeElement, protoClassMap);
+            CIFClass cifClass = CIFClass.fromClass(processingEnv, typeElement, protoClassMap);
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.NOTE,
-                    "proto class for class=[" + CIFClass.getClassName() + "] has been generated"
+                    "Proto class for class=[" + cifClass.getClassName() + "] has been generated"
             );
         } catch (Exception e) {
             processingEnv.getMessager().printMessage(

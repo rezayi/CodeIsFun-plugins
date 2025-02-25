@@ -20,9 +20,8 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>java-serializer-plugin</artifactId>
+            <artifactId>java-serializer-plugin-interface</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
 </project>
