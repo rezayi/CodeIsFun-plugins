@@ -35,40 +35,19 @@ public class CIFClass {
         this.fields.add(CIFField.fromField(processingEnv, field, protoClassMap, imports));
     }
 
-    public String toProto() {
-        StringBuilder builder = new StringBuilder();
-
-        builder
-                .append("syntax = \"proto3\";\n\n")
-                .append("package ").append(packageName).append(";\n")
-                .append("option java_multiple_files = true;\n");
-
-        imports.forEach(CIFClass ->
-                builder.append("import \"").append(CIFClass.fileName).append("\";\n")
-        );
-        builder.append("\n");
-        builder.append("message ").append(className+"Proto").append(" {\n");
-        for (int i = 0; i < fields.size(); i++) {
-            var field = fields.get(i);
-            builder.append("\t").append(field.getType()).append(" ").append(field.getName()).append(" = ").append(i + 1).append(";\n");
-        }
-        builder.append("}");
-        return builder.toString();
-    }
-
-
     public static CIFClass fromClass(ProcessingEnvironment processingEnv, TypeElement typeElement, Map<String, CIFClass> protoClassMap) {
-        CIFClass CIFClass = new CIFClass();
-        CIFClass.className = typeElement.getSimpleName().toString();
+        CIFClass cifClass = new CIFClass();
+        cifClass.className = typeElement.getSimpleName().toString();
         String packageName = typeElement.getQualifiedName().toString();
         packageName = packageName.substring(0, packageName.lastIndexOf("."));
-        CIFClass.packageName = packageName;
-        CIFClass.fileName = CIFClass.getClassName() + "_proto.proto";
+        cifClass.packageName = packageName;
+        cifClass.fileName = cifClass.getClassName() + "_proto.proto";
+        System.out.println(cifClass.className);
         typeElement.getEnclosedElements()
                 .stream()
                 .filter(element -> element.getKind() == ElementKind.FIELD)
-                .forEach(field -> CIFClass.addField(processingEnv, (VariableElement) field, protoClassMap, CIFClass.imports));
-        protoClassMap.put(typeElement.getQualifiedName().toString(), CIFClass);
-        return CIFClass;
+                .forEach(field -> cifClass.addField(processingEnv, (VariableElement) field, protoClassMap, cifClass.imports));
+        protoClassMap.put(typeElement.getQualifiedName().toString(), cifClass);
+        return cifClass;
     }
 }

@@ -40,19 +40,6 @@ class CIFField {
         return name;
     }
 
-    public String getType() {
-        switch (type) {
-            case MAP:
-                return new StringBuilder().append("map<").append(subType1.getType()).append(",").append(subType2.getType()).append("> ").toString();
-            case LIST:
-                return "repeated " + subType1.getType();
-            case OBJECT:
-                return objectClassName + "Proto";
-            default:
-                return type.getProtoType();
-        }
-    }
-
     public static CIFField fromField(
             ProcessingEnvironment processingEnv,
             VariableElement field,
@@ -60,17 +47,17 @@ class CIFField {
             List<CIFClass> imports
     ) {
         TypeMirror typeMirror = field.asType();
-        DeclaredType declaredType = (DeclaredType) typeMirror;
-
         CIFField CIFField = new CIFField();
         CIFField.name = field.getSimpleName().toString();
-        CIFField.type = getTypeByClass(declaredType.asElement().toString());
+        CIFField.type = getTypeByClass(getClassName(typeMirror));
         if (CIFField.type == Type.MAP) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
             List<? extends TypeMirror> parameterizedType = declaredType.getTypeArguments();
             CIFField.subType1 = getProtoSubType(processingEnv, parameterizedType.get(0).toString(), protoClassMap, imports);
             CIFField.subType2 = getProtoSubType(processingEnv, parameterizedType.get(1).toString(), protoClassMap, imports);
         }
         if (CIFField.type == Type.LIST) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
             List<? extends TypeMirror> parameterizedType = declaredType.getTypeArguments();
             CIFField.subType1 = getProtoSubType(processingEnv, parameterizedType.get(0).toString(), protoClassMap, imports);
 
@@ -85,6 +72,18 @@ class CIFField {
                 imports.add(protoClassMap.get(CIFField.objectClassName));
         }
         return CIFField;
+    }
+
+    private static String getClassName(TypeMirror typeMirror) {
+        if (typeMirror instanceof DeclaredType) {
+            DeclaredType declaredType = (DeclaredType) typeMirror;
+            return declaredType.asElement().toString();
+        } else if (typeMirror.getKind().isPrimitive()) {
+            return typeMirror.toString();
+        } else {
+            System.err.println("Unsupported type: " + typeMirror);
+            return typeMirror.toString();
+        }
     }
 
     private static Type getTypeByClass(String className) {
