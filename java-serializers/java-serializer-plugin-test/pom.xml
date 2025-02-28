@@ -15,11 +15,6 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>java-serializer-plugin</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>java-serializer-plugin-impl-kryo</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

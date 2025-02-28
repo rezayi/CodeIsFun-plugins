@@ -10,6 +10,7 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 
 @SupportedAnnotationTypes("online.codeisfun.plugins.serializers.CIFSerializable")
@@ -17,23 +18,37 @@ import java.util.Set;
 @AutoService(Processor.class)
 public class CIFJavaSerializerAnnotationProcessor extends AbstractProcessor {
 
+    public static Class<? extends CIFJavaSerializerInterface> serializerClass = null;
+
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        SerializerLoader.loadImplementations();
-//        var serializerClass = findSerializerInterface(roundEnv);
+        loadImplementations();
+        System.out.println("CIF serializer class: "+ serializerClass.getName());
         for (TypeElement annotation : annotations) {
             Set<? extends TypeElement> annotatedElements = (Set<TypeElement>) roundEnv.getElementsAnnotatedWith(annotation);
             Map<String, CIFClass> cifClassMap = new HashMap<>();
             annotatedElements.forEach(annotatedElement -> {
                 processClass(annotatedElement, cifClassMap);
             });
-//            cifClassMap.forEach((className, cifClass) -> ProcessCifClass(cifClass, serializerClass));
+            cifClassMap.forEach((className, cifClass) -> ProcessCifClass(cifClass, serializerClass));
         }
         return true;
     }
 
-    private void ProcessCifClass(CIFClass cifClass, Class<CIFJavaSerializerInterface> serializerClass) {
+    public void loadImplementations() {
+        ServiceLoader<CIFJavaSerializerInterface> serviceLoader = ServiceLoader.load(CIFJavaSerializerInterface.class, getClass().getClassLoader());
+        for (CIFJavaSerializerInterface serializer : serviceLoader) {
+            System.out.println("Found serializer implementation: " + serializer.getClass().getName());
+            serializerClass = serializer.getClass();
+        }
+    }
+
+    private void ProcessCifClass(CIFClass cifClass, Class<? extends CIFJavaSerializerInterface> serializerClass) {
         try {
             String packageName = cifClass.getPackageName();
             String originalClassName = cifClass.getClassName();

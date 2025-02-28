@@ -3,11 +3,16 @@ package online.codeisfun.plugins.serializers.impl.kryo;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import online.codeisfun.plugins.serializers.CIFClass;
+import online.codeisfun.plugins.serializers.CIFJavaSerializerAnnotationProcessor;
 import online.codeisfun.plugins.serializers.CIFJavaSerializerInterface;
 
 import javax.lang.model.element.Modifier;
 
 public class CIFJavaSerializerKryoImplementation implements CIFJavaSerializerInterface {
+    static {
+        CIFJavaSerializerAnnotationProcessor.serializerClass = CIFJavaSerializerKryoImplementation.class;
+    }
+
     @Override
     public void initialize(TypeSpec.Builder classBuilder, CIFClass cifClass,String newClasName) {
         classBuilder
