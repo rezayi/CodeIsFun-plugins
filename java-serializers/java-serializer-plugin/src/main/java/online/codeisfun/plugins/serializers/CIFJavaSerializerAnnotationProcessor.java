@@ -6,6 +6,8 @@ import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -44,6 +46,25 @@ public class CIFJavaSerializerAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(CIFSerializable.class)) {
+            if (element.getKind() != ElementKind.CLASS) {
+                continue;
+            }
+
+            // Get class name and output path
+            String className = ((TypeElement) element).getQualifiedName().toString();
+            String outputDir = "generated-sources/annotations";
+//            outputDir = outputDir + "/" + className.replace(".java", "").substring(0, className.lastIndexOf('.')).replace('.', '/');
+//            className = className.replace(".java", "").substring(className.lastIndexOf('.') + 1);
+            try {
+                System.out.println("Generating " + className + ".java in directory " + outputDir);
+                ClassModifier.addSerializationMethod(className, outputDir);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
         loadImplementations();
         processingEnv.getMessager().printMessage(
                 Diagnostic.Kind.NOTE, "CIF serializer class: " + serializerClass.getName());
