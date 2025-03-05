@@ -16,7 +16,7 @@ public class ClassModifier {
 
             // Add target/classes explicitly
 //            classPool.appendClassPath(new LoaderClassPath(ClassModifier.class.getClassLoader())); // JVM ClassLoader
-            classPool.insertClassPath("../java-serializer-plugin-test-kryo/target/classes"); // Ensure compiled files are included
+//            classPool.insertClassPath("../java-serializer-plugin-test-kryo/target/classes"); // Ensure compiled files are included
 
             // Debug: Print all available classes
             classPool.getImportedPackages().forEachRemaining(System.out::println);

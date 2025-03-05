@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>online.codeisfun.java-serializers</groupId>
+        <artifactId>java-serializers</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>asm-use</artifactId>
+    <dependencies>
+        <!-- Dependency on module 1 so that the annotation is available -->
+        <dependency>
+            <groupId>online.codeisfun.java-serializers</groupId>
+            <artifactId>asm-generator</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>offline-instrumentation</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>online.codeisfun.javaserializers.OfflineInstrumenter</mainClass>
+                            <arguments>
+                                <!-- Input: your compiled classes directory -->
+                                <argument>${project.build.outputDirectory}</argument>
+                                <!-- Output: a directory for instrumented classes -->
+                                <argument>${project.build.directory}/instrumented-classes</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Configure the Maven Shade or Assembly plugin if you want a runnable fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <classesDirectory>${project.build.directory}/instrumented-classes</classesDirectory>
+                    <archive>
+                        <manifest>
+                            <mainClass>online.codeisfun.javaserializers.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

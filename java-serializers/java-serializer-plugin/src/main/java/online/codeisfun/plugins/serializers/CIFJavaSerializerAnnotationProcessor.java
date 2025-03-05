@@ -3,6 +3,9 @@ package online.codeisfun.plugins.serializers;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -50,21 +53,17 @@ public class CIFJavaSerializerAnnotationProcessor extends AbstractProcessor {
             if (element.getKind() != ElementKind.CLASS) {
                 continue;
             }
+        }
 
-            // Get class name and output path
-            String className = ((TypeElement) element).getQualifiedName().toString();
-            String outputDir = "generated-sources/annotations";
-//            outputDir = outputDir + "/" + className.replace(".java", "").substring(0, className.lastIndexOf('.')).replace('.', '/');
-//            className = className.replace(".java", "").substring(className.lastIndexOf('.') + 1);
+        ClassPool pool = ClassPool.getDefault();
+        String outputDir = processingEnv.getOptions().get("outputDir");
+        if (outputDir != null) {
             try {
-                System.out.println("Generating " + className + ".java in directory " + outputDir);
-                ClassModifier.addSerializationMethod(className, outputDir);
+                pool.insertClassPath(outputDir); // Add target/classes to classpath
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
-
         loadImplementations();
         processingEnv.getMessager().printMessage(
                 Diagnostic.Kind.NOTE, "CIF serializer class: " + serializerClass.getName());
@@ -72,7 +71,29 @@ public class CIFJavaSerializerAnnotationProcessor extends AbstractProcessor {
             Set<? extends TypeElement> annotatedElements = (Set<TypeElement>) roundEnv.getElementsAnnotatedWith(annotation);
             Map<String, CIFClass> cifClassMap = new HashMap<>();
             annotatedElements.forEach(annotatedElement -> {
-                processClass(annotatedElement, cifClassMap);
+//                processClass(annotatedElement, cifClassMap);
+
+                String className = ((TypeElement) annotatedElement).getQualifiedName().toString();
+                try {
+                    CtClass ctClass = pool.get(className);
+                    // Add your modification logic here
+                    String methodBody =
+                            "public String serializeToJson() {" +
+                                    "    try {" +
+                                    "        return \"Hi\";" +
+                                    "    } catch (Exception e) {" +
+                                    "        throw new RuntimeException(\"Serialization failed\", e);" +
+                                    "    }" +
+                                    "}";
+
+                    // Create method in the class
+                    CtMethod newMethod = CtMethod.make(methodBody, ctClass);
+                    ctClass.addMethod(newMethod);
+                    ctClass.writeFile(); // Write to output directory
+                    ctClass.detach();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
             List<String> generatedFiles = new ArrayList<>();
             cifClassMap.forEach((className, cifClass) -> {

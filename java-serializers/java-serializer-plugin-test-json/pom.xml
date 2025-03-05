@@ -24,4 +24,50 @@
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- First compilation: Generate .class files -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <executions>
+<!--                    <execution>-->
+<!--                        <id>default-compile</id>-->
+<!--                        <phase>compile</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>compile</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <annotationProcessorPaths>-->
+<!--                                <path>-->
+<!--                                    <groupId>${project.groupId}</groupId>-->
+<!--                                    <artifactId>java-serializer-plugin-impl-json</artifactId>-->
+<!--                                    <version>${project.parent.version}</version>-->
+<!--                                </path>-->
+<!--                            </annotationProcessorPaths>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+                    <!-- Second execution: Run processor with Javaassist after classes are compiled -->
+                    <execution>
+                        <id>process-classes</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <annotationProcessors>
+                                <annotationProcessor>online.codeisfun.plugins.serializers.CIFJavaSerializerAnnotationProcessor</annotationProcessor>
+                            </annotationProcessors>
+                            <!-- Pass the output directory to the processor -->
+                            <compilerArgs>
+                                <arg>-AoutputDir=${project.build.outputDirectory}</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
