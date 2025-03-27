@@ -1,14 +1,14 @@
 package online.codeisfun.plugins.serializers.impl.kryo;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.util.DefaultInstantiatorStrategy;
+import com.esotericsoftware.kryo.kryo5.Kryo;
+import com.esotericsoftware.kryo.kryo5.io.Input;
+import com.esotericsoftware.kryo.kryo5.io.Output;
+import com.esotericsoftware.kryo.kryo5.objenesis.strategy.StdInstantiatorStrategy;
+import com.esotericsoftware.kryo.kryo5.util.DefaultInstantiatorStrategy;
 import com.squareup.javapoet.*;
 import online.codeisfun.plugins.serializers.CIFClass;
 import online.codeisfun.plugins.serializers.CIFJavaSerializerGeneratorInterface;
 import online.codeisfun.plugins.serializers.CIFSerializerInterface;
-import org.objenesis.strategy.StdInstantiatorStrategy;
 
 import javax.lang.model.element.Modifier;
 import java.io.ByteArrayInputStream;

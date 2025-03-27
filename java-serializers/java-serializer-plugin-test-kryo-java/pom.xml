@@ -9,8 +9,8 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>java-serializer-plugin-test-kryo</artifactId>
-    <name>CodeIsFun :: Plugins :: Java Serializers :: Test :: Kryo</name>
+    <artifactId>java-serializer-plugin-test-kryo-java</artifactId>
+    <name>CodeIsFun :: Plugins :: Java Serializers :: Test :: Kryo (Java)</name>
 
     <dependencies>
         <dependency>

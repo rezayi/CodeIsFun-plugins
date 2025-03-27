@@ -1,13 +1,11 @@
 package online.codeisfun.plugins.serializers;
 
 import com.google.auto.service.AutoService;
-import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.kotlinpoet.ClassName;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -46,25 +44,6 @@ public class CIFJavaSerializerAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (Element element : roundEnv.getElementsAnnotatedWith(CIFSerializable.class)) {
-            if (element.getKind() != ElementKind.CLASS) {
-                continue;
-            }
-
-            // Get class name and output path
-            String className = ((TypeElement) element).getQualifiedName().toString();
-            String outputDir = "generated-sources/annotations";
-//            outputDir = outputDir + "/" + className.replace(".java", "").substring(0, className.lastIndexOf('.')).replace('.', '/');
-//            className = className.replace(".java", "").substring(className.lastIndexOf('.') + 1);
-            try {
-                System.out.println("Generating " + className + ".java in directory " + outputDir);
-                ClassModifier.addSerializationMethod(className, outputDir);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-
         loadImplementations();
         processingEnv.getMessager().printMessage(
                 Diagnostic.Kind.NOTE, "CIF serializer class: " + serializerClass.getName());
@@ -79,7 +58,7 @@ public class CIFJavaSerializerAnnotationProcessor extends AbstractProcessor {
                 var generatedFilePath = processCifClass(cifClass, serializerClass);
                 generatedFiles.add(generatedFilePath);
             });
-            removeOldGeneratedClasses(generatedFiles);
+//            removeOldGeneratedClasses(generatedFiles);
         }
         return true;
     }
@@ -172,15 +151,30 @@ public class CIFJavaSerializerAnnotationProcessor extends AbstractProcessor {
         try {
             String packageName = cifClass.getPackageName();
             String originalClassName = cifClass.getClassName();
-            String generatedClassName = originalClassName + "CIFSerializer";
-            TypeSpec.Builder classBuilder = TypeSpec.classBuilder(generatedClassName);
+            String serializerClassName = originalClassName + "CIFSerializer";
+            TypeSpec.Builder classBuilder = TypeSpec.classBuilder(serializerClassName);
             CIFJavaSerializerGeneratorInterface serializer = serializerClass.getDeclaredConstructor().newInstance();
             serializer.initialize(classBuilder, cifClass, originalClassName);
 
             // Write the class to a Java file
-            var javaFile = JavaFile.builder(packageName, classBuilder.build()).build();
+            var javaFile = com.squareup.javapoet.JavaFile.builder(packageName, classBuilder.build()).build();
             javaFile.writeTo(processingEnv.getFiler());
-            return packageName.replace(".", "/") + "/" + generatedClassName + ".java";
+            if (cifClass.isKotlin()) {
+                String handlerClassName = originalClassName + "CIFSerializerHandler";
+                var serializeFunc = com.squareup.kotlinpoet.FunSpec
+                        .builder("serialize")
+                        .receiver(new ClassName(packageName, originalClassName))
+                        .addStatement("val serializer = " + packageName + "." + serializerClassName + "()")
+                        .addStatement("return serializer.serialize(this)")
+                        .returns(new ClassName("kotlin", "ByteArray"))
+                        .build();
+                var fileSpec = com.squareup.kotlinpoet.FileSpec
+                        .builder(packageName, handlerClassName)
+                        .addFunction(serializeFunc)
+                        .build();
+                fileSpec.writeTo(processingEnv.getFiler());
+            }
+            return packageName.replace(".", "/") + "/" + serializerClassName + ".java";
         } catch (Exception e) {
             processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.ERROR,

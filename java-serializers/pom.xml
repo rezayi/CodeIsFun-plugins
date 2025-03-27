@@ -14,10 +14,13 @@
     <name>CodeIsFun :: Plugins :: Java Serializers</name>
     <modules>
         <module>java-serializer-plugin</module>
+
         <module>java-serializer-plugin-impl-kryo</module>
         <module>java-serializer-plugin-impl-json</module>
 
-        <module>java-serializer-plugin-test-kryo</module>
-        <module>java-serializer-plugin-test-json</module>
+        <module>java-serializer-plugin-test-kryo-java</module>
+        <module>java-serializer-plugin-test-json-java</module>
+
+        <module>java-serializer-plugin-test-kryo-kotlin</module>
     </modules>
 </project>

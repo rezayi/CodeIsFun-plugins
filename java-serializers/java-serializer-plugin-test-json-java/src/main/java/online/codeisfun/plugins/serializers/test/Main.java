@@ -17,12 +17,12 @@ public class Main {
         var deserialized = serializer.deserialize(bytes);
         System.out.println(deserialized);
 
-//        var data2 = Test1.builder().a(111).build();
-//        var serializer2 = new Test1CIFSerializer();
-//        var bytes2 = serializer2.serialize(data2);
-//        System.out.println(bytes2.length);
-//        var deserialized2 = serializer2.deserialize(bytes2);
-//        System.out.println(deserialized2);
+        var data2 = Test1.builder().a(111).build();
+        var serializer2 = new Test1CIFSerializer();
+        var bytes2 = serializer2.serialize(data2);
+        System.out.println(bytes2.length);
+        var deserialized2 = serializer2.deserialize(bytes2);
+        System.out.println(deserialized2);
 
 
     }

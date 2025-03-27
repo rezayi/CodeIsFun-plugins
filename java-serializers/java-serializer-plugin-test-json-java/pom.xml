@@ -9,8 +9,8 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>java-serializer-plugin-test-json</artifactId>
-    <name>CodeIsFun :: Plugins :: Java Serializers :: Test :: json</name>
+    <artifactId>java-serializer-plugin-test-json-java</artifactId>
+    <name>CodeIsFun :: Plugins :: Java Serializers :: Test :: json (Java)</name>
 
     <dependencies>
         <dependency>

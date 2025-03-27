@@ -31,8 +31,8 @@
         </dependency>
         <dependency>
             <groupId>com.squareup</groupId>
-            <artifactId>javapoet</artifactId>
-            <version>1.13.0</version>
+            <artifactId>kotlinpoet-javapoet</artifactId>
+            <version>1.18.0</version>
         </dependency>
     </dependencies>
 
