@@ -14,12 +14,12 @@
     <name>CodeIsFun :: Plugins :: Java Serializers</name>
     <modules>
         <module>java-serializer-plugin</module>
-<!--        <module>java-serializer-plugin-impl-kryo</module>-->
+        <module>java-serializer-plugin-impl-kryo</module>
         <module>java-serializer-plugin-impl-json</module>
-
-<!--        <module>java-serializer-plugin-test-kryo</module>-->
+        <module>java-serializer-plugin-test-kryo</module>
         <module>java-serializer-plugin-test-json</module>
-        <module>asm-generator</module>
-        <module>asm-use</module>
+<!--        <module>asm-generator</module>-->
+<!--        <module>asm-use</module>-->
+<!--        <module>ast-generator</module>-->
     </modules>
 </project>
