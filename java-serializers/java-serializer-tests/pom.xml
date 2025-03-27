@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>online.codeisfun.java-serializers</groupId>
+        <artifactId>java-serializers</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>java-serializer-tests</artifactId>
+    <name>CodeIsFun :: Plugins :: Java Serializers :: Tests</name>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>java-serializer-plugin-test-kryo-java</module>
+        <module>java-serializer-plugin-test-json-java</module>
+
+        <module>java-serializer-plugin-test-kryo-kotlin</module>
+    </modules>
+</project>
